@@ -205,6 +205,7 @@ class IssueHistoryStream(JiraStream):
 
     schema = th.PropertiesList(
         th.Property("id", th.StringType),
+        th.Property("issueId", th.StringType),
         th.Property("created", th.DateTimeType),
         th.Property("author", USER_TYPE),
         th.Property("items", th.ArrayType(
@@ -225,3 +226,13 @@ class IssueHistoryStream(JiraStream):
         @return:
         """
         return JiraPaginator(start_value=0, page_size=self._page_size)
+
+    def post_process(
+        self,
+        row: dict,
+        context: dict | None = None,  # noqa: ARG002
+    ) -> dict | None:
+        return {
+            **row,
+            "issueId": context["issue_id"],
+        }
