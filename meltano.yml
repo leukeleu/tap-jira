@@ -1,0 +1,32 @@
+version: 1
+send_anonymous_usage_stats: true
+project_id: tap-jira
+default_environment: test
+environments:
+- name: test
+plugins:
+  extractors:
+  - name: tap-jira
+    namespace: tap_jira
+    pip_url: -e .
+    capabilities:
+    - state
+    - catalog
+    - discover
+    - about
+    - stream-maps
+    settings:
+    - name: username
+    - name: api_key
+      kind: password
+    - name: domain
+    - name: start_date
+      value: '2010-01-01T00:00:00Z'
+    config:
+      start_date: '2010-01-01T00:00:00Z'
+      username: wdevries@leukeleu.nl
+      domain: leukeleu.atlassian.net
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
