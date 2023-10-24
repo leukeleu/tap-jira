@@ -22,10 +22,6 @@ plugins:
     - name: domain
     - name: start_date
       value: '2010-01-01T00:00:00Z'
-    config:
-      start_date: '2010-01-01T00:00:00Z'
-      username: wdevries@leukeleu.nl
-      domain: leukeleu.atlassian.net
   loaders:
   - name: target-jsonl
     variant: andyh1203

@@ -14,7 +14,30 @@ SAMPLE_CONFIG = {
     "domain": "test.atlassian.net",
 }
 
-SEARCH_RESPONSE = {
+BOARDS_RESPONSE = {
+    "maxResults": 50,
+    "startAt": 0,
+    "total": 1,
+    "isLast": True,
+    "values": [
+        {
+            "id": 10000,
+            "self": "https://your-domain.atlassian.net/rest/agile/1.0/board/10000",
+            "name": "Example Scrum Board",
+            "type": "scrum",
+            "location": {
+                "projectId": 10000,
+                "displayName": "Example Project",
+                "projectKey": "EX",
+                "projectTypeKey": "software",
+                "name": "Example Project",
+            },
+        }
+    ],
+}
+
+
+ISSUE_RESPONSE = {
     "expand": "names,schema",
     "startAt": 0,
     "maxResults": 50,
@@ -26,6 +49,16 @@ SEARCH_RESPONSE = {
             "self": "https://your-domain.atlassian.net/rest/api/3/issue/10002",
             "key": "ED-1",
             "fields": {
+                "sprint": {
+                    "id": 10000,
+                    "self": "https://your-domain.atlassian.net/rest/agile/1.0/sprint/10000",
+                    "state": "active",
+                    "name": "Sprint 1",
+                    "startDate": "2021-01-17T12:34:00.000+0000",
+                    "endDate": "2021-01-31T12:34:00.000+0000",
+                    "originBoardId": 10000,
+                    "goal": "",
+                },
                 "watcher": {
                     "self": "https://your-domain.atlassian.net/rest/api/3/issue/EX-1/watchers",
                     "isWatching": False,
@@ -264,115 +297,71 @@ SEARCH_RESPONSE = {
     "warningMessages": ["The value 'bar' does not exist for the field 'foo'."],
 }
 
-ISSUE_HISTORY_RESPONSE = {
-    "self": "https://your-domain.atlassian.net/rest/api/3/issue/TT-1/changelog?startAt=2&maxResults=2",
-    "nextPage": "https://your-domain.atlassian.net/rest/api/3/issue/TT-1/changelog?&startAt=4&maxResults=2",
-    "maxResults": 2,
-    "startAt": 2,
-    "total": 5,
-    "isLast": False,
+USERS_RESPONSE = [
+    {
+        "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g",
+        "key": "",
+        "accountId": "5b10a2844c20165700ede21g",
+        "accountType": "atlassian",
+        "name": "",
+        "avatarUrls": {
+            "48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=48&s=48",
+            "24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=24&s=24",
+            "16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=16&s=16",
+            "32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=32&s=32",
+        },
+        "displayName": "Mia Krystof",
+        "active": False,
+    },
+    {
+        "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10ac8d82e05b22cc7d4ef5",
+        "key": "",
+        "accountId": "5b10ac8d82e05b22cc7d4ef5",
+        "accountType": "atlassian",
+        "name": "",
+        "avatarUrls": {
+            "48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=48&s=48",
+            "24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=24&s=24",
+            "16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=16&s=16",
+            "32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=32&s=32",
+        },
+        "displayName": "Emma Richards",
+        "active": True,
+    },
+]
+
+SPRINT_RESPONSE = {
+    "maxResults": 1,
+    "startAt": 0,
+    "total": 1,
+    "isLast": True,
     "values": [
         {
-            "id": "10001",
-            "author": {
-                "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g",
-                "accountId": "5b10a2844c20165700ede21g",
-                "emailAddress": "mia@example.com",
-                "avatarUrls": {
-                    "48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=48&s=48",
-                    "24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=24&s=24",
-                    "16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=16&s=16",
-                    "32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=32&s=32",
-                },
-                "displayName": "Mia Krystof",
-                "active": True,
-                "timeZone": "Australia/Sydney",
-            },
-            "created": "1970-01-18T06:27:50.429+0000",
-            "items": [
-                {
-                    "field": "fields",
-                    "fieldtype": "jira",
-                    "fieldId": "fieldId",
-                    "from": None,
-                    "fromString": "",
-                    "to": None,
-                    "toString": "label-1",
-                }
-            ],
-        },
-        {
-            "id": "10002",
-            "author": {
-                "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g",
-                "accountId": "5b10a2844c20165700ede21g",
-                "emailAddress": "mia@example.com",
-                "avatarUrls": {
-                    "48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=48&s=48",
-                    "24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=24&s=24",
-                    "16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=16&s=16",
-                    "32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=32&s=32",
-                },
-                "displayName": "Mia Krystof",
-                "active": True,
-                "timeZone": "Australia/Sydney",
-            },
-            "created": "1970-01-18T06:27:51.429+0000",
-            "items": [
-                {
-                    "field": "fields",
-                    "fieldtype": "jira",
-                    "fieldId": "fieldId",
-                    "from": None,
-                    "fromString": "label-1",
-                    "to": None,
-                    "toString": "label-1 label-2",
-                }
-            ],
-        },
+            "id": 247,
+            "self": "https://your-domain.atlassian.net/rest/agile/1.0/sprint/247",
+            "state": "closed",
+            "name": "Sprint 1",
+            "startDate": "2022-01-31T11:10:06.301Z",
+            "endDate": "2022-02-15T12:30:00.000Z",
+            "completeDate": "2022-02-21T10:47:42.180Z",
+            "originBoardId": 10000,
+            "goal": "Sprint 1 goal",
+        }
     ],
 }
-
-USERS_RESPONSE = [
-  {
-    "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g",
-    "key": "",
-    "accountId": "5b10a2844c20165700ede21g",
-    "accountType": "atlassian",
-    "name": "",
-    "avatarUrls": {
-      "48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=48&s=48",
-      "24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=24&s=24",
-      "16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=16&s=16",
-      "32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=32&s=32"
-    },
-    "displayName": "Mia Krystof",
-    "active": False
-  },
-  {
-    "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10ac8d82e05b22cc7d4ef5",
-    "key": "",
-    "accountId": "5b10ac8d82e05b22cc7d4ef5",
-    "accountType": "atlassian",
-    "name": "",
-    "avatarUrls": {
-      "48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=48&s=48",
-      "24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=24&s=24",
-      "16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=16&s=16",
-      "32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=32&s=32"
-    },
-    "displayName": "Emma Richards",
-    "active": True
-  }
-]
 
 
 # Run standard built-in tap tests from the SDK:
 def test_standard_tap_tests(requests_mock) -> None:  # noqa: ANN001
     """Run standard built-in tap tests from the SDK."""
-    requests_mock.get("/rest/api/3/search", json=SEARCH_RESPONSE)
+    requests_mock.get("/rest/agile/1.0/board?maxResults=100", json=BOARDS_RESPONSE)
     requests_mock.get(
-        re.compile(r"/rest/api/3/issue/[\w-]+/changelog(\?.*)?"), json=SEARCH_RESPONSE
+        re.compile(r"/rest/agile/1.0/board/10000/issue\?maxResults=100.*"),
+        json=ISSUE_RESPONSE,
+    )
+    requests_mock.get(
+        re.compile(r"/rest/agile/1.0/board/10000/sprint\?maxResults=100.*"),
+        json=SPRINT_RESPONSE,
     )
     requests_mock.get("/rest/api/3/users", json=USERS_RESPONSE)
     tests = get_standard_tap_tests(TapJira, config=SAMPLE_CONFIG)

@@ -50,7 +50,8 @@ class TapJira(Tap):
         return [
             streams.IssuesStream(self),
             streams.UsersStream(self),
-            streams.IssueHistoryStream(self),
+            streams.BoardsStream(self),
+            streams.SprintsStream(self),
         ]
 
 
