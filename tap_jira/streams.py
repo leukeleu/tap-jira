@@ -222,6 +222,7 @@ class IssuesStream(JiraAgileApiStream):
                             ),
                         ),
                     ),
+                    th.Property("labels", th.ArrayType(th.StringType)),
                     *[
                         th.Property(key, th.StringType)
                         for key in self.custom_field_mapping.values()
@@ -271,6 +272,7 @@ class IssuesStream(JiraAgileApiStream):
                 "parent",
                 "sprint",
                 "updated",
+                "labels",
                 *self.custom_field_mapping.keys(),
             ],
             "validateQuery": "strict",
