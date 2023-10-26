@@ -39,6 +39,11 @@ class TapJira(Tap):
             th.DateTimeType,
             description="The earliest record date to sync",
         ),
+        th.Property(
+            "custom_fields",
+            th.ObjectType(additional_properties=th.StringType),
+            description="A mapping of custom field IDs to their names",
+        )
     ).to_dict()
 
     def discover_streams(self) -> list[streams.JiraStream]:
