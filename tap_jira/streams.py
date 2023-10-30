@@ -222,6 +222,7 @@ class IssuesStream(JiraAgileApiStream):
                             ),
                         ),
                     ),
+                    th.Property("created", th.DateTimeType),
                     th.Property("labels", th.ArrayType(th.StringType)),
                     *[
                         th.Property(key, th.StringType)
@@ -272,6 +273,7 @@ class IssuesStream(JiraAgileApiStream):
                 "parent",
                 "sprint",
                 "updated",
+                "created",
                 "labels",
                 *self.custom_field_mapping.keys(),
             ],
