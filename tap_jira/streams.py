@@ -225,7 +225,7 @@ class IssuesStream(JiraAgileApiStream):
                     th.Property("created", th.DateTimeType),
                     th.Property("labels", th.ArrayType(th.StringType)),
                     *[
-                        th.Property(key, th.StringType)
+                        th.Property(key, th.StringType)  # TODO: This is not always a string
                         for key in self.custom_field_mapping.values()
                     ]
                 ),
