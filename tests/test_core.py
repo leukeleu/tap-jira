@@ -351,6 +351,21 @@ SPRINT_RESPONSE = {
 }
 
 
+STATUS_RESPONSE = [
+    {
+        "id": "10000",
+        "name": "To Do",
+        "description": "The issue is open and ready for the assignee to start work on it.",
+        "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do",
+        },
+    },
+]
+
+
 # Run standard built-in tap tests from the SDK:
 def test_standard_tap_tests(requests_mock) -> None:  # noqa: ANN001
     """Run standard built-in tap tests from the SDK."""
@@ -361,6 +376,10 @@ def test_standard_tap_tests(requests_mock) -> None:  # noqa: ANN001
     )
     requests_mock.get(
         re.compile(r"/rest/agile/1.0/board/10000/sprint\?maxResults=100.*"),
+        json=SPRINT_RESPONSE,
+    )
+    requests_mock.get(
+        re.compile(r"/rest/api/3/status\?maxResults=100.*"),
         json=SPRINT_RESPONSE,
     )
     requests_mock.get("/rest/api/3/users", json=USERS_RESPONSE)

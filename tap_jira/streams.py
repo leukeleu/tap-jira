@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from http import HTTPStatus
 from typing import Any
 
 import requests
 from singer_sdk import typing as th  # JSON Schema typing helpers
+from singer_sdk.helpers.jsonpath import extract_jsonpath
 
 from tap_jira.client import JiraStream
 from tap_jira.paginators import JiraPaginator, OffsetPaginator
@@ -123,97 +125,112 @@ class IssuesStream(JiraAgileApiStream):
     records_jsonpath = "$.issues[*]"
     next_page_token_jsonpath = "$.startAt"  # noqa: S105
 
-    ISSUE_TYPE = th.Property(
-        "issuetype",
-        th.ObjectType(
-            th.Property("id", th.StringType),
-            th.Property("name", th.StringType),
-            th.Property("subtask", th.BooleanType),
-            th.Property("hierarchyLevel", th.IntegerType),
-        ),
-    )
-    STATUS = th.Property(
-        "status",
-        th.ObjectType(
-            th.Property("id", th.StringType),
-            th.Property("name", th.StringType),
-            th.Property(
-                "statusCategory",
-                th.ObjectType(
-                    th.Property("id", th.IntegerType),
-                    th.Property("key", th.StringType),
-                    th.Property("name", th.StringType),
+    @property
+    def custom_field_mapping(self) -> dict:
+        """Custom field mapping from config."""
+        return self.config.get("custom_fields", {})
+
+    @property
+    def schema(self) -> dict:
+        """Schema with custom fields from config."""
+        issue_type = th.Property(
+            "issuetype",
+            th.ObjectType(
+                th.Property("id", th.StringType),
+                th.Property("name", th.StringType),
+                th.Property("subtask", th.BooleanType),
+                th.Property("hierarchyLevel", th.IntegerType),
+            ),
+        )
+        status = th.Property(
+            "status",
+            th.ObjectType(
+                th.Property("id", th.StringType),
+                th.Property("name", th.StringType),
+                th.Property(
+                    "statusCategory",
+                    th.ObjectType(
+                        th.Property("id", th.IntegerType),
+                        th.Property("key", th.StringType),
+                        th.Property("name", th.StringType),
+                    ),
                 ),
             ),
-        ),
-    )
+        )
 
-    PROJECT_PROPERTY = th.ObjectType(
-        th.Property("id", th.StringType),
-        th.Property("key", th.StringType),
-        th.Property("name", th.StringType),
-        th.Property("projectTypeKey", th.StringType),
-    )
-    schema = th.PropertiesList(
-        th.Property("id", th.StringType),
-        th.Property("key", th.StringType),
-        th.Property("updated", th.DateTimeType),
-        th.Property("sprint_id", th.IntegerType),
-        th.Property(
-            "changelog",
-            th.ObjectType(
-                th.Property(
-                    "histories",
-                    th.ArrayType(
-                        th.ObjectType(
-                            th.Property("id", th.StringType),
-                            th.Property("issueId", th.StringType),
-                            th.Property("created", th.DateTimeType),
-                            th.Property("author", USER_PROPERTY),
-                            th.Property(
-                                "items",
-                                th.ArrayType(
-                                    th.ObjectType(
-                                        th.Property("field", th.StringType),
-                                        th.Property("fieldtype", th.StringType),
-                                        th.Property("from", th.StringType),
-                                        th.Property("fromString", th.StringType),
-                                        th.Property("to", th.StringType),
-                                        th.Property("toString", th.StringType),
+        project_property = th.ObjectType(
+            th.Property("id", th.StringType),
+            th.Property("key", th.StringType),
+            th.Property("name", th.StringType),
+            th.Property("projectTypeKey", th.StringType),
+        )
+
+        return th.PropertiesList(
+            th.Property("id", th.StringType),
+            th.Property("key", th.StringType),
+            th.Property("updated", th.DateTimeType),
+            th.Property("sprint_id", th.IntegerType),
+            th.Property(
+                "changelog",
+                th.ObjectType(
+                    th.Property(
+                        "histories",
+                        th.ArrayType(
+                            th.ObjectType(
+                                th.Property("id", th.StringType),
+                                th.Property("issueId", th.StringType),
+                                th.Property("created", th.DateTimeType),
+                                th.Property("author", USER_PROPERTY),
+                                th.Property(
+                                    "items",
+                                    th.ArrayType(
+                                        th.ObjectType(
+                                            th.Property("field", th.StringType),
+                                            th.Property("fieldtype", th.StringType),
+                                            th.Property("from", th.StringType),
+                                            th.Property("fromString", th.StringType),
+                                            th.Property("to", th.StringType),
+                                            th.Property("toString", th.StringType),
+                                        ),
                                     ),
                                 ),
                             ),
                         ),
-                    ),
-                )
+                    )
+                ),
             ),
-        ),
-        th.Property(
-            "fields",
-            th.ObjectType(
-                th.Property("summary", th.StringType),
-                th.Property("project", PROJECT_PROPERTY),
-                STATUS,
-                th.Property("assignee", USER_PROPERTY),
-                ISSUE_TYPE,
-                th.Property(
-                    "parent",
-                    th.ObjectType(
-                        th.Property("id", th.StringType),
-                        th.Property("key", th.StringType),
-                        th.Property(
-                            "fields",
-                            th.ObjectType(
-                                th.Property("summary", th.StringType),
-                                ISSUE_TYPE,
-                                STATUS,
+            th.Property(
+                "fields",
+                th.ObjectType(
+                    th.Property("summary", th.StringType),
+                    th.Property("project", project_property),
+                    status,
+                    th.Property("assignee", USER_PROPERTY),
+                    issue_type,
+                    th.Property(
+                        "parent",
+                        th.ObjectType(
+                            th.Property("id", th.StringType),
+                            th.Property("key", th.StringType),
+                            th.Property(
+                                "fields",
+                                th.ObjectType(
+                                    th.Property("summary", th.StringType),
+                                    issue_type,
+                                    status,
+                                ),
                             ),
                         ),
                     ),
+                    th.Property("created", th.DateTimeType),
+                    th.Property("labels", th.ArrayType(th.StringType)),
+                    *[
+                        th.Property(key, th.StringType)  # TODO: This is not always a string
+                        for key in self.custom_field_mapping.values()
+                    ]
                 ),
             ),
-        ),
-    ).to_dict()
+        ).to_dict()
 
     def get_url_params(
         self,
@@ -256,6 +273,9 @@ class IssuesStream(JiraAgileApiStream):
                 "parent",
                 "sprint",
                 "updated",
+                "created",
+                "labels",
+                *self.custom_field_mapping.keys(),
             ],
             "validateQuery": "strict",
         }
@@ -274,8 +294,20 @@ class IssuesStream(JiraAgileApiStream):
         Returns:
             The updated record dictionary, or ``None`` to skip the record.
         """
+        row["fields"].update({
+            self.custom_field_mapping[key]: value
+            for key, value in row["fields"].items()
+            if key in self.custom_field_mapping
+        })
+
+        # Remove custom field IDs from the fields object
+        for key in self.custom_field_mapping:
+            row["fields"].pop(key, None)
+
         row["updated"] = row["fields"]["updated"]
-        row["sprint_id"] = row["fields"]["sprint"]["id"] if row["fields"]["sprint"] else None
+        row["sprint_id"] = (
+            row["fields"]["sprint"]["id"] if row["fields"]["sprint"] else None
+        )
         return row
 
     def get_new_paginator(self) -> BaseAPIPaginator:
@@ -310,3 +342,26 @@ class UsersStream(JiraStream):
             A pagination helper instance.
         """
         return OffsetPaginator(start_value=0, page_size=self._page_size)
+
+
+class WorkflowStatusesStream(JiraStream):
+    """Workflow statuses stream.
+
+    This is an unpaginated response
+    """
+
+    name = "workflow_statuses"
+    path = "/status"
+    primary_keys: t.ClassVar[list[str]] = ["id"]
+    replication_key = None
+
+    schema = th.PropertiesList(
+        th.Property("id", th.StringType),
+        th.Property("name", th.StringType),
+        th.Property("description", th.StringType),
+        th.Property("statusCategory", th.PropertiesList(
+            th.Property("id", th.IntegerType),
+            th.Property("key", th.StringType),
+            th.Property("name", th.StringType),
+        )),
+    ).to_dict()
