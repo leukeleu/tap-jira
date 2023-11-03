@@ -342,3 +342,26 @@ class UsersStream(JiraStream):
             A pagination helper instance.
         """
         return OffsetPaginator(start_value=0, page_size=self._page_size)
+
+
+class WorkflowStatusesStream(JiraStream):
+    """Workflow statuses stream.
+
+    This is an unpaginated response
+    """
+
+    name = "workflow_statuses"
+    path = "/status"
+    primary_keys: t.ClassVar[list[str]] = ["id"]
+    replication_key = None
+
+    schema = th.PropertiesList(
+        th.Property("id", th.StringType),
+        th.Property("name", th.StringType),
+        th.Property("description", th.StringType),
+        th.Property("statusCategory", th.PropertiesList(
+            th.Property("id", th.IntegerType),
+            th.Property("key", th.StringType),
+            th.Property("name", th.StringType),
+        )),
+    ).to_dict()
