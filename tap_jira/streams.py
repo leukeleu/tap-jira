@@ -277,7 +277,7 @@ class IssuesStream(JiraAgileApiStream):
                 "labels",
                 *self.custom_field_mapping.keys(),
             ],
-            "validateQuery": "strict",
+            "validateQuery": True,
         }
 
     def post_process(
